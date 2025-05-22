@@ -1,0 +1,7 @@
+role consumer_manager
+	modelPermission: read
+
+	tablePermission Customers = [Segment] == "Consumer"
+
+	annotation PBI_Id = c3b92295335e4288987b519d73e7ae99
+

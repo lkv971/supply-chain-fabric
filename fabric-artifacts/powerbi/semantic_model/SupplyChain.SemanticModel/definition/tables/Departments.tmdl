@@ -1,0 +1,33 @@
+table Departments
+	lineageTag: 113bb891-07c9-4bc2-af24-1f67016bf608
+	sourceLineageTag: 2df0b0ec-c526-48be-9d0e-8d601e137915
+
+	column 'Department ID'
+		dataType: int64
+		isHidden
+		isNullable: false
+		formatString: 0
+		lineageTag: c03a8ccc-caf1-458b-8892-344dcdb00067
+		sourceLineageTag: 2de61782-0896-448d-b5bd-03a6bd1fcaf3
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Department ID
+
+		annotation SummarizationSetBy = User
+
+	column Department
+		dataType: string
+		lineageTag: eeef9b6e-9dd1-464f-8ce4-6ed5568d2c2c
+		sourceLineageTag: 8ce8cfdf-9605-4bff-807e-069c246cc30c
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Department
+
+		annotation SummarizationSetBy = User
+
+	partition Departments = entity
+		mode: directQuery
+		source
+			entityName: Departments
+			expressionSource: 'DirectQuery to AS - SM_SupplyChain'
+

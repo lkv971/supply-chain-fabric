@@ -1,0 +1,7 @@
+role corporate_manager
+	modelPermission: read
+
+	tablePermission Customers = [Segment] == "corporate"
+
+	annotation PBI_Id = 2ebb23abf20b406e87fcc47fb050fae5
+

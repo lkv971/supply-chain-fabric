@@ -1,0 +1,7 @@
+role home_office_manager
+	modelPermission: read
+
+	tablePermission Customers = [Segment] == "Home Office"
+
+	annotation PBI_Id = 4601f925db3740efb5c5857e4f3f6f90
+

@@ -1,0 +1,158 @@
+table Customers
+	lineageTag: 3f0acbf3-f436-4606-a032-618c37cfd575
+	sourceLineageTag: [SupplyChain].[DimCustomers]
+
+	measure 'Total Customers' = DISTINCTCOUNT(Customers[Customer ID])
+		formatString: 0
+		displayFolder: Customer Metrics
+		lineageTag: 5dc321dd-8fd1-4ef0-87b9-53367956f16f
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
+	measure 'Customer Rentention Rate %' = ```
+			
+			VAR TotalCustomers = [Total Customers]
+			VAR RepeatCustomers = CALCULATE(DISTINCTCOUNT(Orders[Customer ID]), FILTER(Orders, CALCULATE(COUNTROWS(Orders), ALLEXCEPT(Orders, Orders[Customer ID])) > 1)) 
+			RETURN DIVIDE (RepeatCustomers, TotalCustomers)
+			```
+		displayFolder: Customer Metrics
+		lineageTag: 488f8877-9ba1-4d79-89c2-d3d84a8345c7
+
+		changedProperty = DisplayFolder
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Top Customer Segment' = TOPN(1, VALUES(Customers[Segment]), [Total Customers], DESC)
+		displayFolder: Customer Metrics
+		lineageTag: 828fa96c-0459-46ed-ae10-4b68673d480d
+
+		changedProperty = DisplayFolder
+
+		changedProperty = Name
+
+	column 'Customer ID'
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 3503bd94-1e2d-4a22-91e1-52c78e64cc58
+		sourceLineageTag: CustomerID
+		summarizeBy: none
+		sourceColumn: CustomerID
+
+		changedProperty = IsHidden
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'First Name'
+		dataType: string
+		sourceProviderType: varchar(200)
+		displayFolder: Customer Details
+		lineageTag: 8ab5f3dc-3f80-4784-944e-3a10b255a357
+		sourceLineageTag: FirstName
+		summarizeBy: none
+		sourceColumn: FirstName
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Last Name'
+		dataType: string
+		sourceProviderType: varchar(200)
+		displayFolder: Customer Details
+		lineageTag: 42804568-ab53-4f45-bf4a-f61cfbadd399
+		sourceLineageTag: LastName
+		summarizeBy: none
+		sourceColumn: LastName
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
+		annotation SummarizationSetBy = Automatic
+
+	column State
+		dataType: string
+		sourceProviderType: varchar(10)
+		lineageTag: cc44c46f-239a-46e2-9422-83cca01dcde3
+		sourceLineageTag: State
+		dataCategory: StateOrProvince
+		summarizeBy: none
+		sourceColumn: State
+
+		changedProperty = DataCategory
+
+		annotation SummarizationSetBy = Automatic
+
+	column Country
+		dataType: string
+		sourceProviderType: varchar(100)
+		lineageTag: 94ba8e2e-2fd9-48c5-ae34-42a277e53d38
+		sourceLineageTag: Country
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: Country
+
+		changedProperty = DataCategory
+
+		annotation SummarizationSetBy = Automatic
+
+	column Segment
+		dataType: string
+		sourceProviderType: varchar(100)
+		lineageTag: 72a19fa0-26d8-4dad-b21b-f4458859b00f
+		sourceLineageTag: Segment
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Unique Customer Key'
+		dataType: string
+		sourceProviderType: varchar(200)
+		displayFolder: Customer Details
+		lineageTag: 34d7435e-0b8e-4975-9485-e660c2633254
+		sourceLineageTag: UniqueCustomerKey
+		summarizeBy: none
+		sourceColumn: UniqueCustomerKey
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy 'Customer Geography Hierarchy'
+		lineageTag: b7979814-21e3-47f4-b9e5-5a94c6a1ad5b
+
+		level Country
+			lineageTag: 4c438f9b-ae96-4c64-967c-6daf5278d1e2
+			column: Country
+
+		level State
+			lineageTag: 483fb7ba-1ba1-40b8-a98d-a2f9f019cb51
+			column: State
+
+		changedProperty = Name
+
+	partition Customers = entity
+		mode: directLake
+		source
+			entityName: DimCustomers
+			schemaName: SupplyChain
+			expressionSource: DatabaseQuery
+
+	changedProperty = Name
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,109 @@
+table Dates
+	lineageTag: 42e68b06-f6ca-4648-8271-8f6b8b3be911
+	sourceLineageTag: eeb5f098-7cd9-4e0b-953c-ad4f174de7c2
+
+	column 'Date ID'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 60b6cdee-031d-45d8-ac6a-e815d817ca39
+		sourceLineageTag: 353a0096-3155-422c-8c88-c132b1492e35
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Date ID
+
+		annotation SummarizationSetBy = User
+
+	column Date
+		dataType: dateTime
+		isNullable: false
+		formatString: Short Date
+		lineageTag: 0e919f45-ba3f-4516-92c2-212d5fe40e04
+		sourceLineageTag: ab1ee1b4-ef4a-47b9-8ebc-817266d4c750
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = User
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 73a71cea-94dc-4784-8b8f-93e47ebaf27d
+		sourceLineageTag: ce74870e-8ced-49ee-91a7-716b44b6ce76
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = User
+
+	column Month
+		dataType: int64
+		formatString: 0
+		lineageTag: d7a4f130-9226-4869-9e0e-89ed22c45883
+		sourceLineageTag: fb3a5179-226d-4210-9b6f-415cef0a59de
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = User
+
+	column Day
+		dataType: int64
+		formatString: 0
+		lineageTag: 44ca375f-976f-457c-95de-ef5d6116d1b5
+		sourceLineageTag: 9f0bf7c6-8cb9-45f9-aec7-7bd3ae76ff41
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Day
+
+		annotation SummarizationSetBy = User
+
+	column 'Month Name'
+		dataType: string
+		displayFolder: Date Descriptions
+		lineageTag: c6bed457-5b64-4397-8e4e-6825fecd62da
+		sourceLineageTag: 6ecfec5e-ead2-4edb-97ed-0ed5c6dc615e
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Month Name
+		sortByColumn: Month
+
+		annotation SummarizationSetBy = User
+
+	column 'Day Name'
+		dataType: string
+		displayFolder: Date Descriptions
+		lineageTag: 4f47855b-2f79-4871-bbad-0a28a8b86a09
+		sourceLineageTag: f9493c84-a7ae-4176-b135-9454229fa90a
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Day Name
+
+		annotation SummarizationSetBy = User
+
+	hierarchy 'Calendar Hierarchy'
+		lineageTag: eb0ef03e-b108-4425-a830-fbab7f1a7fa6
+		sourceLineageTag: 7ac65e08-dbd2-4c17-8a6e-acaf9e86a8d3
+
+		level Year
+			lineageTag: 69b5493c-a512-4004-856a-bc71f8746c4d
+			sourceLineageTag: b8c31434-5110-44c2-85ae-9f2292b8aa0f
+			column: Year
+
+		level 'Month Name'
+			lineageTag: e9cd30f5-fbe2-4991-abd1-f6c4d77265a5
+			sourceLineageTag: b700c398-aa08-46f6-a99c-7ee71fc460f9
+			column: 'Month Name'
+
+		level Day
+			lineageTag: c2479ca8-28a1-4b66-9416-830bdb91907b
+			sourceLineageTag: 18297149-5b8d-4402-bd11-61692b2cd9dc
+			column: Day
+
+	partition Dates = entity
+		mode: directQuery
+		source
+			entityName: Dates
+			expressionSource: 'DirectQuery to AS - SM_SupplyChain'
+

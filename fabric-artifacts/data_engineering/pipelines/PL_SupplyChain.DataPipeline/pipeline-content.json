@@ -1,0 +1,493 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "Lookup",
+        "typeProperties": {
+          "source": {
+            "type": "DataWarehouseSource",
+            "sqlReaderQuery": "SELECT COALESCE(MAX(ProcessedTime), CAST('1970-01-01 00:00:00.00' AS DATETIME2(3)))\r\nAS last_modified\r\nFROM SupplyChain.IngestionLogs \r\n;",
+            "partitionOption": "None",
+            "queryTimeout": "02:00:00"
+          },
+          "datasetSettings": {
+            "type": "DataWarehouseTable",
+            "typeProperties": {
+              "schema": "SupplyChain",
+              "table": "IngestionLogs"
+            },
+            "schema": [],
+            "linkedService": {
+              "name": "WH_SupplyChain",
+              "properties": {
+                "type": "DataWarehouse",
+                "typeProperties": {
+                  "artifactId": "5fb6540a-e0cf-4a65-a5a0-98798b54ceb3",
+                  "endpoint": "xisdbyhsv57ubp3vvd3oymv5ou-x7uzgfbh7gmengthfcogz3hvli.datawarehouse.fabric.microsoft.com",
+                  "workspaceId": "1493e9bf-f927-4698-9a67-289c6cecf55a"
+                },
+                "annotations": []
+              }
+            },
+            "annotations": []
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "LookupLastModified",
+        "dependsOn": []
+      },
+      {
+        "type": "GetMetadata",
+        "typeProperties": {
+          "datasetSettings": {
+            "type": "DelimitedText",
+            "typeProperties": {
+              "location": {
+                "type": "FileServerLocation"
+              },
+              "columnDelimiter": ",",
+              "quoteChar": "\"",
+              "escapeChar": "\\",
+              "firstRowAsHeader": true
+            },
+            "schema": [],
+            "externalReferences": {
+              "connection": "e63f7bdf-d8c6-4ddd-acc7-782c65806864"
+            },
+            "annotations": []
+          },
+          "fieldList": [
+            "childItems"
+          ],
+          "storeSettings": {
+            "type": "FileServerReadSettings",
+            "recursive": true,
+            "enablePartitionDiscovery": false
+          },
+          "formatSettings": {
+            "type": "DelimitedTextReadSettings"
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "GetFilesMetadata",
+        "dependsOn": [
+          {
+            "activity": "LookupLastModified",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Filter",
+        "typeProperties": {
+          "items": {
+            "value": "@activity('GetFilesMetadata').output.childItems",
+            "type": "Expression"
+          },
+          "condition": {
+            "value": "@contains(createArray('supply_chain_data.csv', 'countries_es_eng.csv'), item().name)",
+            "type": "Expression"
+          }
+        },
+        "name": "FilterTargetFiles",
+        "dependsOn": [
+          {
+            "activity": "GetFilesMetadata",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "ForEach",
+        "typeProperties": {
+          "items": {
+            "value": "@activity('FilterTargetFiles').output.value",
+            "type": "Expression"
+          },
+          "activities": [
+            {
+              "type": "IfCondition",
+              "typeProperties": {
+                "expression": {
+                  "value": "@greater(activity('GetFilesLastModified').output.lastModified, activity('LookupLastModified').output.firstRow.last_modified)",
+                  "type": "Expression"
+                },
+                "ifTrueActivities": [
+                  {
+                    "type": "Copy",
+                    "typeProperties": {
+                      "source": {
+                        "type": "DelimitedTextSource",
+                        "formatSettings": {
+                          "type": "DelimitedTextReadSettings"
+                        },
+                        "storeSettings": {
+                          "type": "FileServerReadSettings",
+                          "recursive": false,
+                          "enablePartitionDiscovery": false,
+                          "modifiedDatetimeStart": {
+                            "value": "@variables('last_modified')",
+                            "type": "Expression"
+                          }
+                        },
+                        "datasetSettings": {
+                          "type": "DelimitedText",
+                          "typeProperties": {
+                            "location": {
+                              "type": "FileServerLocation",
+                              "fileName": {
+                                "value": "@item().name",
+                                "type": "Expression"
+                              }
+                            },
+                            "columnDelimiter": ",",
+                            "quoteChar": "\"",
+                            "escapeChar": "\\",
+                            "firstRowAsHeader": true
+                          },
+                          "schema": [],
+                          "externalReferences": {
+                            "connection": "e63f7bdf-d8c6-4ddd-acc7-782c65806864"
+                          },
+                          "annotations": []
+                        }
+                      },
+                      "sink": {
+                        "type": "DelimitedTextSink",
+                        "formatSettings": {
+                          "type": "DelimitedTextWriteSettings",
+                          "quoteAllText": true,
+                          "fileExtension": ".txt"
+                        },
+                        "storeSettings": {
+                          "type": "LakehouseWriteSettings"
+                        },
+                        "datasetSettings": {
+                          "type": "DelimitedText",
+                          "typeProperties": {
+                            "location": {
+                              "type": "LakehouseLocation",
+                              "folderPath": "raw_data",
+                              "fileName": {
+                                "value": "@item().name",
+                                "type": "Expression"
+                              }
+                            },
+                            "columnDelimiter": ",",
+                            "quoteChar": "\"",
+                            "escapeChar": "\\",
+                            "firstRowAsHeader": true
+                          },
+                          "schema": [],
+                          "linkedService": {
+                            "name": "LH_SupplyChain",
+                            "properties": {
+                              "type": "Lakehouse",
+                              "typeProperties": {
+                                "artifactId": "6238d60f-cb47-aaa5-4e7f-ee8b8da37622",
+                                "workspaceId": "00000000-0000-0000-0000-000000000000",
+                                "rootFolder": "Files"
+                              },
+                              "annotations": []
+                            }
+                          },
+                          "annotations": []
+                        }
+                      },
+                      "translator": {
+                        "type": "TabularTranslator",
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                          "allowDataTruncation": true,
+                          "treatBooleanAsNumber": false
+                        }
+                      },
+                      "enableStaging": false
+                    },
+                    "policy": {
+                      "timeout": "0.12:00:00",
+                      "retry": 0,
+                      "retryIntervalInSeconds": 30,
+                      "secureInput": false,
+                      "secureOutput": false
+                    },
+                    "name": "Copyfiles",
+                    "dependsOn": []
+                  },
+                  {
+                    "type": "SetVariable",
+                    "typeProperties": {
+                      "variableName": "files_copied",
+                      "value": true
+                    },
+                    "policy": {
+                      "secureInput": false,
+                      "secureOutput": false
+                    },
+                    "name": "SetFilesCopiedFlag",
+                    "dependsOn": [
+                      {
+                        "activity": "Copyfiles",
+                        "dependencyConditions": [
+                          "Succeeded"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "ifFalseActivities": []
+              },
+              "name": "CheckIfModified",
+              "dependsOn": [
+                {
+                  "activity": "GetFilesLastModified",
+                  "dependencyConditions": [
+                    "Succeeded"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "GetMetadata",
+              "typeProperties": {
+                "datasetSettings": {
+                  "type": "DelimitedText",
+                  "typeProperties": {
+                    "location": {
+                      "type": "FileServerLocation",
+                      "fileName": {
+                        "value": "@item().name\n",
+                        "type": "Expression"
+                      }
+                    },
+                    "columnDelimiter": ",",
+                    "quoteChar": "\"",
+                    "escapeChar": "\\",
+                    "firstRowAsHeader": true
+                  },
+                  "schema": [],
+                  "externalReferences": {
+                    "connection": "e63f7bdf-d8c6-4ddd-acc7-782c65806864"
+                  },
+                  "annotations": []
+                },
+                "fieldList": [
+                  "lastModified"
+                ],
+                "storeSettings": {
+                  "type": "FileServerReadSettings",
+                  "recursive": true,
+                  "enablePartitionDiscovery": false
+                },
+                "formatSettings": {
+                  "type": "DelimitedTextReadSettings"
+                }
+              },
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "GetFilesLastModified",
+              "dependsOn": []
+            }
+          ]
+        },
+        "name": "ForEach",
+        "dependsOn": [
+          {
+            "activity": "FilterTargetFiles",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "IfCondition",
+        "typeProperties": {
+          "expression": {
+            "value": "@variables('files_copied')",
+            "type": "Expression"
+          },
+          "ifTrueActivities": [
+            {
+              "type": "TridentNotebook",
+              "typeProperties": {
+                "notebookId": "c6405884-27f0-b359-46b7-98f4517481e1",
+                "workspaceId": "00000000-0000-0000-0000-000000000000"
+              },
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "TransformData",
+              "dependsOn": []
+            },
+            {
+              "type": "SqlServerStoredProcedure",
+              "typeProperties": {
+                "storedProcedureName": "[SupplyChain].[sp_UpdateInsertData]"
+              },
+              "linkedService": {
+                "name": "WH_SupplyChain",
+                "properties": {
+                  "type": "DataWarehouse",
+                  "typeProperties": {
+                    "artifactId": "5fb6540a-e0cf-4a65-a5a0-98798b54ceb3",
+                    "endpoint": "xisdbyhsv57ubp3vvd3oymv5ou-x7uzgfbh7gmengthfcogz3hvli.datawarehouse.fabric.microsoft.com",
+                    "workspaceId": "1493e9bf-f927-4698-9a67-289c6cecf55a"
+                  },
+                  "annotations": []
+                }
+              },
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 3,
+                "retryIntervalInSeconds": 60,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "ExecuteStoredProc",
+              "dependsOn": [
+                {
+                  "activity": "StagingViews",
+                  "dependencyConditions": [
+                    "Succeeded"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Script",
+              "typeProperties": {
+                "scripts": [
+                  {
+                    "text": {
+                      "value": "DROP VIEW IF EXISTS SupplyChain.Staging_DimCountries;\nEXEC('CREATE VIEW SupplyChain.Staging_DimCountries\nAS\nSELECT DISTINCT CountryID, Country, Region, Market\nFROM LH_SupplyChain.dbo.dimcountries;')\n;\nDROP VIEW IF EXISTS SupplyChain.Staging_DimCategories;\nEXEC('CREATE VIEW SupplyChain.Staging_DimCategories\nAS \nSELECT DISTINCT CategoryID, CategoryName\nFROM LH_SupplyChain.dbo.dimcategories;')\n;\nDROP VIEW IF EXISTS SupplyChain.Staging_DimDepartments;\nEXEC('CREATE VIEW SupplyChain.Staging_DimDepartments\nAS\nSELECT DISTINCT DepartmentID, DepartmentName\nFROM LH_SupplyChain.dbo.dimdepartments;')\n;\nDROP VIEW IF EXISTS SupplyChain.Staging_DimCustomers;\nEXEC('CREATE VIEW SupplyChain.Staging_DimCustomers\nAS\nSELECT DISTINCT CustomerID, FirstName, LastName, State, Country, Segment, UniqueCustomerKey\nFROM LH_SupplyChain.dbo.dimcustomers;')\n;\nDROP VIEW IF EXISTS SupplyChain.Staging_DimProducts;\nEXEC('CREATE VIEW SupplyChain.Staging_DimProducts\nAS\nSELECT DISTINCT ProductID, ProductName, CategoryID, DepartmentID, Price\nFROM LH_SupplyChain.dbo.dimproducts;')\n;\nDROP VIEW IF EXISTS SupplyChain.Staging_DimDates;\nEXEC('CREATE VIEW SupplyChain.Staging_DimDates\nAS \nSELECT DISTINCT DateID, Date, Year, Month, Day, MonthName, DayName\nFROM LH_SupplyChain.dbo.dimdates;')\n;\nDROP VIEW IF EXISTS SupplyChain.Staging_FactOrders;\nEXEC('CREATE VIEW SupplyChain.Staging_FactOrders\nAS \nSELECT DISTINCT OrderID, OrderDate, CustomerID, ProductID, CountryID, Discount, Price, Quantity, Total, TotalAfterDiscount, Profit, PaymentType,\nDaysForShipping, DaysForShipment, ShippingMode, LateDeliveryRisk, DeliveryStatus, ShippingDate, OnTimeShippingTarget\nFROM LH_SupplyChain.dbo.factorders;')\n;",
+                      "type": "Expression"
+                    },
+                    "type": "NonQuery"
+                  }
+                ],
+                "scriptBlockExecutionTimeout": "02:00:00"
+              },
+              "linkedService": {
+                "name": "WH_SupplyChain",
+                "properties": {
+                  "type": "DataWarehouse",
+                  "typeProperties": {
+                    "artifactId": "5fb6540a-e0cf-4a65-a5a0-98798b54ceb3",
+                    "endpoint": "xisdbyhsv57ubp3vvd3oymv5ou-x7uzgfbh7gmengthfcogz3hvli.datawarehouse.fabric.microsoft.com",
+                    "workspaceId": "1493e9bf-f927-4698-9a67-289c6cecf55a"
+                  },
+                  "annotations": []
+                }
+              },
+              "policy": {
+                "timeout": "0.00:10:00",
+                "retry": 3,
+                "retryIntervalInSeconds": 60,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "StagingViews",
+              "dependsOn": [
+                {
+                  "activity": "TransformData",
+                  "dependencyConditions": [
+                    "Succeeded"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Script",
+              "typeProperties": {
+                "scripts": [
+                  {
+                    "text": {
+                      "value": "INSERT INTO SupplyChain.IngestionLogs (PipelineName, ProcessedTime, Status, RowsProcessed)\r\nVALUES ('PL_SupplyChain', SYSUTCDATETIME(), 'Succeeded', @{json(activity('TransformData').output.result.exitValue).RowsProcessed});",
+                      "type": "Expression"
+                    },
+                    "type": "NonQuery"
+                  }
+                ],
+                "scriptBlockExecutionTimeout": "02:00:00"
+              },
+              "linkedService": {
+                "name": "WH_SupplyChain",
+                "properties": {
+                  "type": "DataWarehouse",
+                  "typeProperties": {
+                    "artifactId": "5fb6540a-e0cf-4a65-a5a0-98798b54ceb3",
+                    "endpoint": "xisdbyhsv57ubp3vvd3oymv5ou-x7uzgfbh7gmengthfcogz3hvli.datawarehouse.fabric.microsoft.com",
+                    "workspaceId": "1493e9bf-f927-4698-9a67-289c6cecf55a"
+                  },
+                  "annotations": []
+                }
+              },
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "UpdateLogTable",
+              "dependsOn": [
+                {
+                  "activity": "ExecuteStoredProc",
+                  "dependencyConditions": [
+                    "Succeeded"
+                  ]
+                }
+              ]
+            }
+          ],
+          "ifFalseActivities": []
+        },
+        "name": "CheckFilesCopied",
+        "dependsOn": [
+          {
+            "activity": "ForEach",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      }
+    ],
+    "variables": {
+      "last_modified": {
+        "type": "String",
+        "defaultValue": "1971-01-01 00:00:00.000"
+      },
+      "files_copied": {
+        "type": "Boolean",
+        "defaultValue": false
+      }
+    }
+  }
+}

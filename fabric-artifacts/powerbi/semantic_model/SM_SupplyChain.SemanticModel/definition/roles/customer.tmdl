@@ -1,0 +1,7 @@
+role customer
+	modelPermission: read
+
+	tablePermission Customers = [Unique Customer Key] == "USERPRINCIPALNAME()"
+
+	annotation PBI_Id = 633571abdce14cb38f2c325cec848cb5
+

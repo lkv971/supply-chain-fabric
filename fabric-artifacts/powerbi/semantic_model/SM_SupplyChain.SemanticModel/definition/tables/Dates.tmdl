@@ -1,0 +1,137 @@
+table Dates
+	lineageTag: eeb5f098-7cd9-4e0b-953c-ad4f174de7c2
+	sourceLineageTag: [SupplyChain].[DimDates]
+	dataCategory: Time
+
+	column 'Date ID'
+		dataType: int64
+		isHidden
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 353a0096-3155-422c-8c88-c132b1492e35
+		sourceLineageTag: DateID
+		summarizeBy: none
+		sourceColumn: DateID
+
+		changedProperty = IsHidden
+
+		changedProperty = Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: Short Date
+		sourceProviderType: date
+		lineageTag: ab1ee1b4-ef4a-47b9-8ebc-817266d4c750
+		sourceLineageTag: Date
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = DataType
+
+		changedProperty = FormatString
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	column Year
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: ce74870e-8ced-49ee-91a7-716b44b6ce76
+		sourceLineageTag: Year
+		summarizeBy: none
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: fb3a5179-226d-4210-9b6f-415cef0a59de
+		sourceLineageTag: Month
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	column Day
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 9f0bf7c6-8cb9-45f9-aec7-7bd3ae76ff41
+		sourceLineageTag: Day
+		summarizeBy: none
+		sourceColumn: Day
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Name'
+		dataType: string
+		sourceProviderType: varchar(100)
+		displayFolder: Date Descriptions
+		lineageTag: 6ecfec5e-ead2-4edb-97ed-0ed5c6dc615e
+		sourceLineageTag: MonthName
+		summarizeBy: none
+		sourceColumn: MonthName
+		sortByColumn: Month
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Day Name'
+		dataType: string
+		sourceProviderType: varchar(100)
+		displayFolder: Date Descriptions
+		lineageTag: f9493c84-a7ae-4176-b135-9454229fa90a
+		sourceLineageTag: DayName
+		summarizeBy: none
+		sourceColumn: DayName
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy 'Calendar Hierarchy'
+		lineageTag: 7ac65e08-dbd2-4c17-8a6e-acaf9e86a8d3
+
+		level Year
+			lineageTag: b8c31434-5110-44c2-85ae-9f2292b8aa0f
+			column: Year
+
+		level 'Month Name'
+			lineageTag: b700c398-aa08-46f6-a99c-7ee71fc460f9
+			column: 'Month Name'
+
+		level Day
+			lineageTag: 18297149-5b8d-4402-bd11-61692b2cd9dc
+			column: Day
+
+		changedProperty = Name
+
+	partition Dates = entity
+		mode: directLake
+		source
+			entityName: DimDates
+			schemaName: SupplyChain
+			expressionSource: DatabaseQuery
+
+	changedProperty = Name
+
+	annotation PBI_ResultType = Table
+

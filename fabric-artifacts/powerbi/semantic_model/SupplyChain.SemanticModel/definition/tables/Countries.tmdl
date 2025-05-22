@@ -1,0 +1,72 @@
+table Countries
+	lineageTag: 540ddf70-60a3-4e1a-a0b3-239fd00a4117
+	sourceLineageTag: 30dd750a-9d1a-467c-b7c3-9351498d6bc6
+
+	column 'Country ID'
+		dataType: int64
+		isHidden
+		isNullable: false
+		formatString: 0
+		lineageTag: f8acbdda-912e-436d-af7a-30c57d6f647e
+		sourceLineageTag: f432ba83-075d-463f-9c84-49b57020a4a1
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Country ID
+
+		annotation SummarizationSetBy = User
+
+	column Country
+		dataType: string
+		lineageTag: 1d21a998-78cf-4ad8-8189-c23b771199b3
+		sourceLineageTag: aaa8c16c-2100-44c5-be18-8d16e44d9f56
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation SummarizationSetBy = User
+
+	column Region
+		dataType: string
+		lineageTag: 1d455e84-16b8-4432-a664-b68f2e43dc31
+		sourceLineageTag: cd24c362-31e9-411b-a474-35923d9bd3f2
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = User
+
+	column Market
+		dataType: string
+		lineageTag: 210b2f9d-6bb6-4864-9d72-c1fdc3da0a26
+		sourceLineageTag: e09e19a2-15a4-439a-b537-5d4818a7add5
+		dataCategory: Continent
+		summarizeBy: none
+		sourceColumn: Market
+
+		annotation SummarizationSetBy = User
+
+	hierarchy 'Geography Hierarchy'
+		lineageTag: ff6afab4-490c-440d-8f5a-4e3985cef539
+		sourceLineageTag: be37f47c-8e86-4644-96b8-70c1c5427ffd
+
+		level Market
+			lineageTag: e2eec0c2-bb00-4f4b-a999-bc96efab5ed5
+			sourceLineageTag: 2f617a60-082b-4359-bd50-13161dca6b4a
+			column: Market
+
+		level Region
+			lineageTag: 50b6a3e5-61f4-4bae-921d-2d92d86deca9
+			sourceLineageTag: eceaf14a-10be-49f5-9231-05444a50d54d
+			column: Region
+
+		level Country
+			lineageTag: 9343ead1-0c14-4314-a76d-a8536f218ce2
+			sourceLineageTag: 9ea64621-73df-4bc9-89a9-08fe33428037
+			column: Country
+
+	partition Countries = entity
+		mode: directQuery
+		source
+			entityName: Countries
+			expressionSource: 'DirectQuery to AS - SM_SupplyChain'
+

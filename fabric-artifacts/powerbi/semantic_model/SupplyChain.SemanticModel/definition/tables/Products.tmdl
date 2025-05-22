@@ -1,0 +1,83 @@
+table Products
+	lineageTag: 0de1ccfc-dbf6-4b01-b85e-265bb7b3214b
+	sourceLineageTag: 84536826-6373-4afe-9790-4d62d5c3a0f0
+
+	measure 'Average Product Price' = EXTERNALMEASURE("Average Product Price", DOUBLE, "DirectQuery to AS - SM_SupplyChain")
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Product Metrics
+		lineageTag: 74c158c4-3a03-4351-a0c9-82ad01028477
+		sourceLineageTag: 92859d6b-73f2-4882-9933-ee5c3cdb606e
+		dataCategory: Uncategorized
+
+	measure 'Top Selling Product' = EXTERNALMEASURE("Top Selling Product", STRING, "DirectQuery to AS - SM_SupplyChain")
+		displayFolder: Product Metrics
+		lineageTag: e093a953-31cc-4a80-8ad7-24c51d748a19
+		sourceLineageTag: 1016a5eb-7ea6-4d09-bc62-218c4bd70e20
+		dataCategory: Uncategorized
+
+	column 'Product ID'
+		dataType: int64
+		isHidden
+		isNullable: false
+		formatString: 0
+		lineageTag: b6cff2f2-5fae-43bd-9fb2-c73ce4d0371f
+		sourceLineageTag: 4e68391f-37c4-4526-b0ca-6fe085e61ee8
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Product ID
+
+		annotation SummarizationSetBy = User
+
+	column Product
+		dataType: string
+		displayFolder: Product Details
+		lineageTag: 7a495335-3ed1-4471-ba71-4410391d119f
+		sourceLineageTag: 8d462753-83c4-40e1-a92e-553bc27a09d6
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Product
+
+		annotation SummarizationSetBy = User
+
+	column 'Category ID'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 3c258e66-094c-42bd-aa89-c63042984ca1
+		sourceLineageTag: f7e07b05-8523-442b-8755-d636ae08eafe
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Category ID
+
+		annotation SummarizationSetBy = User
+
+	column 'Department ID'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e7d5cc7b-7f1a-49cb-ba71-e73a572b4d4e
+		sourceLineageTag: 1676d0b7-700a-4c38-9733-7ce43e59e24a
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Department ID
+
+		annotation SummarizationSetBy = User
+
+	column Price
+		dataType: double
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Product Details
+		lineageTag: 1ac4d6d5-f9a5-4520-a337-dec96c2f8793
+		sourceLineageTag: 60b45b9b-b5c7-4087-be0c-ea55c060202a
+		dataCategory: Uncategorized
+		summarizeBy: sum
+		sourceColumn: Price
+
+		annotation SummarizationSetBy = User
+
+	partition Products = entity
+		mode: directQuery
+		source
+			entityName: Products
+			expressionSource: 'DirectQuery to AS - SM_SupplyChain'
+

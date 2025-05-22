@@ -1,0 +1,11 @@
+expression 'DirectQuery to AS - SM_SupplyChain' =
+		let
+		    Source = AnalysisServices.Database("powerbi://api.powerbi.com/v1.0/myorg/SupplyChain", "SM_SupplyChain"),
+		    Cubes = Table.Combine(Source[Data]),
+		    Cube = Cubes{[Id="Model", Kind="Cube"]}[Data]
+		in
+		    Cube
+	lineageTag: 24f69ea3-e764-4d1f-9828-8da5720813b7
+
+	annotation PBI_IncludeFutureArtifacts = True
+

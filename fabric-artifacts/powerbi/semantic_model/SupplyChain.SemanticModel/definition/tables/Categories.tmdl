@@ -1,0 +1,33 @@
+table Categories
+	lineageTag: 82f77d6f-9347-468f-8f28-37a055990e57
+	sourceLineageTag: 6dfa1168-1cfb-4a4a-945c-b1d42f8828ec
+
+	column 'Category ID'
+		dataType: int64
+		isHidden
+		isNullable: false
+		formatString: 0
+		lineageTag: 133e115d-0bcb-4e6d-a088-a46b10d55437
+		sourceLineageTag: 7d2cf1e7-7784-424f-8211-c7104bfd0300
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Category ID
+
+		annotation SummarizationSetBy = User
+
+	column Category
+		dataType: string
+		lineageTag: af12e5c8-f964-4fc2-9f89-c70e15d6dd2b
+		sourceLineageTag: cd38b754-324a-4eaa-8f82-9b6e2e605493
+		dataCategory: Uncategorized
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = User
+
+	partition Categories = entity
+		mode: directQuery
+		source
+			entityName: Categories
+			expressionSource: 'DirectQuery to AS - SM_SupplyChain'
+
